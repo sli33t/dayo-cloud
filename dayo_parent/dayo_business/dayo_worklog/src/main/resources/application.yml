@@ -1,0 +1,74 @@
+server:
+  port: 9902
+
+spring:
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password: bchs@0!9
+    timeout: 10000ms  #redis请求超时时间，超过此值redis自动断开连接
+    jedis:
+      pool:
+        max-active: 32 #jedis最大连接数，超过此值则提示获取不到连接异常
+        max-wait: 100ms #jedis最大等待时间，超过此值会提示连接超时异常
+        max-idle: 32 #jedis最大等待连接数
+        min-idle: 0 #jedis最小等待连接数
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/worklog?useSSL=false&useUnicode=true&serverTimezone=Asia/Shanghai&characterEncoding=utf-8
+    username: root
+    password: root
+
+  application:
+    name: dayo-worklog
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+
+  thymeleaf:
+    mode: HTML
+    encoding: UTF-8
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    servlet:
+      content-type: text/html
+
+  main:
+    allow-bean-definition-overriding: true
+
+  mvc:
+    static-path-pattern: /static/**
+
+  aop:
+    auto: true
+    proxy-target-class: true
+
+  rabbitmq:
+    host: 127.0.0.1
+    username: admin
+    password: admin
+    port: 5672
+    virtual-host: worklog
+
+  http:
+    encoding:
+      enabled: true
+      charset: utf-8
+      force: true
+
+mybatis-plus:
+  configuration:
+    #还是把结果日志打印出来，方便查询bug
+    log-impl: org.apache.ibatis.logging.log4j2.Log4j2Impl
+    #因为有LbMap，所以null的全部显示
+    call-setters-on-nulls: true
+
+
+myfile:
+  tempFilePath: D:/fileRepository/temp
+  myFolderPath: D:/fileRepository/file

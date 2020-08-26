@@ -1,0 +1,23 @@
+server:
+  port: 9901
+
+spring:
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password: bchs@0!9
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/worklog?useSSL=false&useUnicode=true&serverTimezone=Asia/Shanghai&characterEncoding=utf-8
+    username: root
+    password: root
+
+  application:
+    name: dayo-system
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
