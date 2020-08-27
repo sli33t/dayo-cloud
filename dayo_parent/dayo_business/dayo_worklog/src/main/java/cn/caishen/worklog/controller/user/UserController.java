@@ -17,6 +17,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * @author LB
+ */
 @RestController
 @RequestMapping(value = "/user")
 public class UserController extends BaseController {

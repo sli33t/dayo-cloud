@@ -78,8 +78,6 @@ public class BaseController {
         if (user==null){
             throw new LoginException("用户没有登录");
         }else{
-            //User user = JSONObject.parseObject(userStr.toString(), User.class);
-
             this.userId = user.getUserId();
             this.username = user.getUsername();
             this.telNo = user.getTelNo();
