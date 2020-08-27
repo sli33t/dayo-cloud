@@ -9,6 +9,7 @@ import org.springframework.cglib.beans.BeanMap;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -18,7 +19,7 @@ import java.util.Map.Entry;
  * @author linbin
  */
 @Component
-public class LbMap extends LinkedHashMap<String, Object> implements Comparator<LbMap> {
+public class LbMap extends LinkedHashMap<String, Object> implements Comparator<LbMap>, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	

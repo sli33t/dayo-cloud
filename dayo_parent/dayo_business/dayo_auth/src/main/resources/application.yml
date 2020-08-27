@@ -1,0 +1,42 @@
+server:
+  port: 9903
+
+spring:
+  application:
+    name: dayo-auth
+  main:
+    allow-bean-definition-overriding: true
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/worklog?useSSL=false&useUnicode=true&serverTimezone=Asia/Shanghai&characterEncoding=utf-8
+    username: root
+    password: root
+
+#  cloud:
+#    nacos:
+#      discovery:
+#        server-addr: 127.0.0.1:8848
+
+dayo:
+  jwt:
+    pubKeyPath: D:/Code/dayo_parent/temp/ssh/id_rsa.pub # 公钥地址
+    priKeyPath: D:/Code/dayo_parent/temp/ssh/id_rsa # 私钥地址
+    user:
+      expire: 30 # 过期时间,单位分钟
+      cookieName: dayoToken # cookie名称
+      cookieDomain: caishen.cn # cookie的域
+
+dubbo:
+  application:
+    name: dayo-auth
+    logger: slf4j
+  registry:
+    address: nacos://127.0.0.1:8848
+  protocol:
+    name: dubbo
+    port: 8803
+  consumer:
+    check: false
+    retries: 0
+    timeout: 70000

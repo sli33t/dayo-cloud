@@ -24,10 +24,10 @@ spring:
   application:
     name: dayo-worklog
 
-  cloud:
-    nacos:
-      discovery:
-        server-addr: 127.0.0.1:8848
+#  cloud:
+#    nacos:
+#      discovery:
+#        server-addr: 127.0.0.1:8848
 
   thymeleaf:
     mode: HTML
@@ -72,3 +72,18 @@ mybatis-plus:
 myfile:
   tempFilePath: D:/fileRepository/temp
   myFolderPath: D:/fileRepository/file
+
+
+dubbo:
+  application:
+    name: dayo-worklog
+    logger: slf4j
+  registry:
+    address: nacos://127.0.0.1:8848
+  protocol:
+    name: dubbo
+    port: 8802
+  consumer:
+    check: false
+    retries: 0
+    timeout: 70000

@@ -1,0 +1,208 @@
+package cn.caishen.worklog.controller.role;
+
+import cn.caishen.common.domain.po.Role;
+import cn.caishen.common.utils.JSONUtil;
+import cn.caishen.common.utils.LbMap;
+import cn.caishen.serviceinterface.system.RoleService;
+import cn.caishen.worklog.controller.BaseController;
+import com.github.pagehelper.PageInfo;
+import org.apache.dubbo.config.annotation.DubboReference;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+@RestController
+@RequestMapping(value = "/role")
+public class RoleController extends BaseController {
+
+    //private final static Logger logger = (Logger) LoggerFactory.getLogger(RoleController.class);
+
+    @DubboReference
+    private RoleService dayoRoleService;
+
+
+    /**
+     * 跳转列表页面
+     * @return
+     */
+    @GetMapping(value = "/toRoleList")
+    public ModelAndView toRoleList(){
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("role/role-list");
+        return mv;
+    }
+
+
+    /**
+     * 查询所有岗位信息
+     * @return
+     */
+    @GetMapping(value = "/findAll")
+    public LbMap findAll(@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int limit, @RequestParam(defaultValue = "") String jsonStr){
+        try {
+            LbMap param = LbMap.fromObject(jsonStr);
+            PageInfo<Role> pages = dayoRoleService.findAll(page, limit, param);
+            logger.info("岗位查询成功");
+            return LbMap.successResult("岗位查询成功", pages.getList(), pages.getTotal());
+        }catch (Exception e){
+            return LbMap.failResult("岗位查询失败，"+e.getMessage());
+        }
+    }
+
+
+    /**
+     * 跳转新增页面
+     * @return
+     */
+    @GetMapping(value = "/toAdd")
+    public ModelAndView toAdd(){
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("role/role-add");
+        return mv;
+    }
+
+    /**
+     * 通过编号查询岗位信息
+     * @param roleId
+     * @return
+     */
+    @GetMapping(value = "/toUpdate")
+    public ModelAndView toUpdate(String roleId){
+        ModelAndView mv = new ModelAndView();
+        try {
+            if (roleId.equals("")){
+                throw new Exception("没有找到岗位编号");
+            }
+
+            Role role = dayoRoleService.findById(roleId);
+            if (role!=null){
+                mv.addObject("role", role);
+                mv.setViewName("role/role-update");
+            }else {
+                mv.setViewName("system/error");
+                mv.addObject("errorMsg", "没有找到岗位信息");
+            }
+            logger.info("查询成功");
+            return mv;
+        }catch (Exception e){
+            mv.setViewName("system/error");
+            mv.addObject("errorMsg", e.getMessage());
+            logger.info("查询失败");
+            return mv;
+        }
+    }
+
+    /**
+     * 新增和修改
+     * @param role
+     * @return
+     */
+    @PostMapping(value = "/edit")
+    public LbMap edit(Role role) {
+        try {
+            if (role.getRoleName().equals("")){
+                return LbMap.failResult("岗位编辑失败，岗位名称不能为空！");
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            role.setCreateTime(dateFormat.parse(dateFormat.format(new Date())));
+
+            //新增
+            if (StringUtils.isEmpty(role.getRoleId())){
+                List<Role> roleList = dayoRoleService.checkRoleInfo(role.getRoleName());
+
+                if (roleList!=null&&roleList.size()>0){
+                    for (Role oldRole : roleList) {
+                        if (oldRole.getRoleName().equals(role.getRoleName())){
+                            return LbMap.failResult("岗位名称已经存在");
+                        }
+                    }
+                }
+
+                //初始化的行版本号为0
+                role.setRowVersion(0);
+                role.setDeleteFlag(0);
+                //ID为空的为新增
+                dayoRoleService.save(role);
+            }else {
+                //ID不为空的为修改
+                dayoRoleService.update(role);
+            }
+
+            return LbMap.successResult("岗位编辑成功");
+        }catch (Exception e){
+            logger.info("岗位编辑失败："+e.getMessage());
+            return LbMap.failResult("岗位编辑失败，"+e.getMessage());
+        }
+    }
+
+    /**
+     * 删除
+     * @param roleId
+     * @return
+     */
+    @PostMapping(value = "/delete")
+    public LbMap delete(String roleId, String rowVersion){
+        try {
+            if (roleId.equals("")){
+                return LbMap.failResult("岗位删除失败，没有找到岗位编号！");
+            }
+            dayoRoleService.delete(roleId, rowVersion);
+            logger.info(roleId+"岗位删除成功");
+            return LbMap.successResult("岗位删除成功");
+        }catch (Exception e){
+            return LbMap.failResult("岗位删除失败，"+e.getMessage());
+        }
+    }
+
+    /**
+     * 跳转分配用户页面
+     * @param roleId
+     * @return
+     */
+    @GetMapping(value = "/toUserRole")
+    public ModelAndView toUserRole(String roleId){
+        ModelAndView mv = new ModelAndView();
+        try {
+            if (roleId.equals("")){
+                throw new Exception("没有找到岗位编号");
+            }
+
+            Role role = dayoRoleService.findById(roleId);
+            mv.addObject("role", role);
+            mv.setViewName("role/role-userRole");
+            logger.info("查询成功");
+            return mv;
+        }catch (Exception e){
+            mv.setViewName("system/error");
+            mv.addObject("errorMsg", e.getMessage());
+            logger.info("查询失败");
+            return mv;
+        }
+    }
+
+    /**
+     * 保存分配用户
+     * @param jsonStr
+     * @return
+     */
+    @PostMapping(value = "/updateUserRole")
+    public LbMap updateUserRole(String jsonStr){
+        LbMap map = LbMap.fromObject(jsonStr);
+        if (map==null||map.size()==0){
+            return LbMap.failResult("没有选择用户信息");
+        }
+
+        try {
+            LbMap param = LbMap.fromObject(jsonStr);
+            return dayoRoleService.updateUserRole(param);
+        }catch (Exception e){
+            return LbMap.failResult("用户分配失败，"+e.getMessage());
+        }
+    }
+
+}

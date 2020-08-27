@@ -20,17 +20,29 @@ spring:
           enabled: true
       # 配置规则
       routes:
-        # id 起别名
+        # id 系统设置
         - id: dayo-system
           # 以 lb:// 开头，后面的是注册在 Nacos 上的服务名
           uri: lb://dayo-system
           predicates:
-            # 匹配 GET 和 POST 请求
-            - Method=GET,POST,PUT,DELETE
             # 匹配路径 /service 此路径下的请求通过这里
-            - Path=/dayoSystem/**
+            - Path=/system/**
           filters:
             # 必须加这个，否则会将/dayoSystem/也会匹配进最终的路径中去 出现404
             - StripPrefix=1
 
+        # id 工作日志
+        - id: dayo-worklog
+          uri: lb://dayo-worklog
+          predicates:
+            - Path=/worklog/**
+          filters:
+            - StripPrefix=1
 
+        # id 授权
+        - id: dayo-auth
+          uri: lb://dayo-auth
+          predicates:
+            - Path=/auth/**
+          filters:
+            - StripPrefix=1
