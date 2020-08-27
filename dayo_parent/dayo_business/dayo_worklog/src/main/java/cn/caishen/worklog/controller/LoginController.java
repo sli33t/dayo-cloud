@@ -1,6 +1,8 @@
 package cn.caishen.worklog.controller;
 
 import cn.caishen.common.domain.po.User;
+import cn.caishen.common.domain.vo.UserVo;
+import cn.caishen.common.utils.CookieUtils;
 import cn.caishen.common.utils.JSONUtil;
 import cn.caishen.common.utils.LbMap;
 import cn.caishen.serviceinterface.auth.AuthService;
@@ -50,7 +52,7 @@ public class LoginController {
     @PostMapping(value = "/login")
     public LbMap login(@RequestParam("telNo") String telNo, @RequestParam("password") String password, HttpServletRequest request, HttpServletResponse response){
         try {
-            User user = dayoAuthService.loginAuth(telNo, password, response);
+            UserVo user = dayoAuthService.loginAuth(telNo, password);
             if (user!=null){
                 logger.info("登录成功："+user.toString());
 
@@ -71,6 +73,19 @@ public class LoginController {
                 HttpSession session = request.getSession();
                 session.setAttribute(MQConstant.RABBIT_MQ_SETTING, rabbitMap.toString());
                 session.setAttribute("user", user);
+
+                CookieUtils.newCookieBuilder()
+                        // response,用于写cookie
+                        .response(response)
+                        // 保证安全防止XSS攻击，不允许JS操作cookie
+                        .httpOnly(true)
+                        // 设置domain
+                        .domain(user.getCookieDomain())
+                        // 设置cookie名称和值
+                        .name(user.getCookieName()).value(user.getDayoToken())
+                        // 写cookie
+                        .build();
+
             }else {
                 LbMap.failResult("登录失败，未找到用户信息");
             }

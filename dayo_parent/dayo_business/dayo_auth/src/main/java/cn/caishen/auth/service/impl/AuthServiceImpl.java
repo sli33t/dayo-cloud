@@ -4,6 +4,7 @@ import cn.caishen.auth.config.JwtProperties;
 import cn.caishen.common.auth.entity.Payload;
 import cn.caishen.common.auth.jwtUtils.JwtUtil;
 import cn.caishen.common.domain.po.User;
+import cn.caishen.common.domain.vo.UserVo;
 import cn.caishen.common.utils.CookieUtils;
 import cn.caishen.common.utils.JSONUtil;
 import cn.caishen.common.utils.LbMap;
@@ -13,6 +14,7 @@ import cn.caishen.serviceinterface.system.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.apache.dubbo.config.annotation.DubboService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,20 +37,19 @@ public class AuthServiceImpl implements AuthService {
      * 登录
      * @param telNo 电话号码
      * @param password 明文密码
-     * @param response 写入cookie
      * @return 登录是否成功
      */
     @Override
-    public User loginAuth(String telNo, String password, HttpServletResponse response) {
+    public UserVo loginAuth(String telNo, String password) {
         try {
             User user =  dayoUserService.findByTelNo(telNo);
             if (!user.getPassword().equals(MD5Util.md5(password, telNo))){
-                return new User();
+                return new UserVo();
             }
 
             String token = JwtUtil.generateTokenExpireInMinutes(user, jwtProperties.getPrivateKey(), jwtProperties.getUser().getExpire());
             // 写入cookie
-            CookieUtils.newCookieBuilder()
+            /*CookieUtils.newCookieBuilder()
                     // response,用于写cookie
                     .response(response)
                     // 保证安全防止XSS攻击，不允许JS操作cookie
@@ -58,12 +59,20 @@ public class AuthServiceImpl implements AuthService {
                     // 设置cookie名称和值
                     .name(jwtProperties.getUser().getCookieName()).value(token)
                     // 写cookie
-                    .build();
+                    .build();*/
 
             //LbMap resultMap = LbMap.successResult("用户登录成功", JSONUtil.classToJsonString(user));
             //resultMap.put(jwtProperties.getUser().getCookieName(), token);
+
             user.setDayoToken(token);
-            return user;
+
+            UserVo userVo = new UserVo();
+            BeanUtils.copyProperties(user, userVo);
+            //cookie名称
+            userVo.setCookieName(jwtProperties.getUser().getCookieName());
+            //cookie作用域
+            userVo.setCookieDomain(jwtProperties.getUser().getCookieDomain());
+            return userVo;
         }catch (Exception e){
             return null;
         }
@@ -92,10 +101,8 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public LbMap getUserByToken(String token, HttpServletRequest request) {
+    public LbMap getUserByToken(String token) {
         try {
-            //读取cookie
-            //String token = CookieUtils.getCookieValue(request, jwtProperties.getUser().getCookieName());
             if (token.equals("")){
                 log.info("token令牌为空");
                 return LbMap.failResult("令牌不能为空");

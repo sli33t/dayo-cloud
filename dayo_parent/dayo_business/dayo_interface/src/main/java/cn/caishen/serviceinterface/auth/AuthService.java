@@ -1,6 +1,7 @@
 package cn.caishen.serviceinterface.auth;
 
 import cn.caishen.common.domain.po.User;
+import cn.caishen.common.domain.vo.UserVo;
 import cn.caishen.common.utils.LbMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -16,10 +17,9 @@ public interface AuthService {
      * 登录
      * @param telNo 电话号码
      * @param password 明文密码
-     * @param response 写入cookie
      * @return 登录是否成功
      */
-    User loginAuth(String telNo, String password, HttpServletResponse response);
+    UserVo loginAuth(String telNo, String password);
 
     /**
      * 设置token
@@ -32,8 +32,7 @@ public interface AuthService {
     /**
      * 通过用户获取token
      * @param token token
-     * @param request 请求
      * @return 用户信息
      */
-    LbMap getUserByToken(String token, HttpServletRequest request);
+    LbMap getUserByToken(String token);
 }

@@ -68,7 +68,7 @@ public class BaseController {
         logger.info("请求的token："+request.getHeader(RequestConstant.DAYO_TOKEN));
 
         String token = CookieUtils.getCookieValue(request, RequestConstant.DAYO_TOKEN);
-        LbMap userMap = dayoAuthService.getUserByToken(token, request);
+        LbMap userMap = dayoAuthService.getUserByToken(token);
         User user = null;
         if (userMap!=null){
             String userStr = userMap.getString("data");

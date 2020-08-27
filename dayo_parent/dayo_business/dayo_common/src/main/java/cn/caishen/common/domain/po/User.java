@@ -16,6 +16,8 @@ import java.util.Date;
 @Data
 public class User implements Serializable{
 
+    private static final long serialVersionUID = 8935171055191313090L;
+
     @TableId(value = "USER_ID", type = IdType.ID_WORKER_STR)
     private String userId;
 
